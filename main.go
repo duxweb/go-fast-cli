@@ -1,41 +1,41 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-
-	. "github.com/dave/jennifer/jen"
-	"github.com/urfave/cli/v2"
+	"github.com/duxweb/duxtool/annotation"
+	"github.com/duxweb/duxtool/create"
+	"github.com/duxweb/duxtool/gen"
+	"github.com/gookit/gcli/v3"
 )
 
 func main() {
-	app := &cli.App{
-		Name: "dux",
-		Commands: []*cli.Command{
+
+	app := gcli.NewApp()
+	app.Version = "0.0.1"
+	app.Desc = "duxgo command line tool"
+
+	app.Add(&gcli.Command{
+		Name: "create",
+		Desc: "Initialize duxgo project",
+		Func: create.InitCommand,
+	})
+
+	app.Add(&gcli.Command{
+		Name: "annotation",
+		Desc: "duxgo annotation index",
+		Func: annotation.AnnotationCommand,
+	})
+
+	app.Add(&gcli.Command{
+		Name: "gen",
+		Desc: "duxgo code generator",
+		Subs: []*gcli.Command{
 			{
-				Name:  "generate:app",
-				Usage: "generate app application",
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:  "name",
-						Usage: "app name",
-					},
-				},
-				Action: func(cCtx *cli.Context) error {
-					fmt.Println("added task: ", cCtx.Args().First())
-					f := NewFile("main")
-					f.Func().Id("main").Params().Block(
-						Qual("fmt", "Println").Call(Lit("Hello, world")),
-					)
-					fmt.Printf("%#v", f)
-					return nil
-				},
+				Name: "app",
+				Desc: "Generate application module",
+				Func: gen.GenAppCommand,
 			},
 		},
-	}
+	})
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
-	}
+	app.Run(nil)
 }
